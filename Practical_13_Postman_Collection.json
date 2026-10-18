@@ -1,0 +1,103 @@
+{
+  "info": {
+    "_postman_id": "c1d2e3f4-a5b6-4901-abcd-prac13collection",
+    "name": "AWDF Practical 13: AI API Integration & Graceful Degradation",
+    "description": "Postman Collection for testing server-side AI generation, graceful failure degradation, rate limiting, and task management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. POST Generate Description (Normal AI Call)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Implement JWT authentication middleware in Express\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/ai/generate-description",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "ai", "generate-description"]
+        },
+        "description": "Server calls OpenAI API securely with key stored in .env. Returns parsed description and suggested priority."
+      }
+    },
+    {
+      "name": "2. POST Generate Description (Simulate API Failure / Graceful Degradation)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Implement JWT authentication middleware in Express\",\n  \"testFailure\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/ai/generate-description",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "ai", "generate-description"]
+        },
+        "description": "Step 6 demonstration: Simulates AI failure (401 or network outage) and verifies graceful degradation fallback without crashing."
+      }
+    },
+    {
+      "name": "3. POST Create Task with AI Data",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Implement JWT authentication middleware in Express\",\n  \"description\": \"Write auth middleware to verify Bearer tokens and protect routes.\",\n  \"priority\": \"high\",\n  \"isAiAssisted\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks"]
+        },
+        "description": "Saves task to database."
+      }
+    },
+    {
+      "name": "4. GET All Tasks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks"]
+        },
+        "description": "Fetch all tasks including AI-assisted badges."
+      }
+    },
+    {
+      "name": "5. GET Server Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["health"]
+        },
+        "description": "Check server availability."
+      }
+    }
+  ]
+}

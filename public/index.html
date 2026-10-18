@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPilot — AI Task Studio | AWDF Practical 13</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <!-- Top navigation -->
+        <nav class="topbar">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true">✦</span>
+                <div class="brand-copy">
+                    <strong>TaskPilot</strong>
+                    <span>AI Task Studio</span>
+                </div>
+            </div>
+            <div class="topbar-meta">
+                <span class="status-chip"><span class="status-dot" aria-hidden="true"></span> Keys stay server-side</span>
+                <span class="meta-chip">ITUE301 · Practical 13</span>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <header class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> Secure AI integration</p>
+                <h1>The task studio where <span class="grad">AI drafts</span> and you decide.</h1>
+                <p class="hero-sub">Backend-only API keys, graceful degradation when the model is down, and a human-in-the-loop editing flow — wrapped in one focused workspace.</p>
+            </div>
+            <aside class="system-card" aria-label="Security architecture summary">
+                <div class="system-card-head"><span class="pulse" aria-hidden="true"></span> System status</div>
+                <div class="system-row"><span>API key location</span><strong>Server .env</strong></div>
+                <div class="system-row"><span>Browser exposure</span><strong class="good">None</strong></div>
+                <div class="system-row"><span>AI rate limit</span><strong>5 req / min</strong></div>
+                <div class="system-row"><span>Failure mode</span><strong>Graceful fallback</strong></div>
+            </aside>
+        </header>
+
+        <!-- Workspace -->
+        <main class="workspace">
+            <!-- Composer -->
+            <section class="panel composer">
+                <div class="panel-head">
+                    <span class="panel-index">01</span>
+                    <div>
+                        <h2>Compose with AI</h2>
+                        <p>Generate a draft, then review and edit it before saving.</p>
+                    </div>
+                </div>
+
+                <form id="task-form">
+                    <div class="form-group">
+                        <label for="task-title">Task title <span class="req">*</span></label>
+                        <div class="title-row">
+                            <input type="text" id="task-title" placeholder="e.g. Audit the checkout flow for edge cases" autocomplete="off" required>
+                            <button type="button" id="btn-generate-ai" class="btn btn-ai">
+                                <span class="spark" aria-hidden="true">✦</span> Generate with AI
+                            </button>
+                        </div>
+                        <p class="field-hint">Only the title is sent to the backend — never credentials or personal data.</p>
+                    </div>
+
+                    <label class="switch-row" for="toggle-failure">
+                        <input type="checkbox" id="toggle-failure">
+                        <span class="switch-copy">
+                            <strong>Simulate API failure</strong>
+                            <small>Watch graceful degradation take over</small>
+                        </span>
+                    </label>
+
+                    <!-- Supplementary Problem 1: Loading State -->
+                    <div id="ai-loading" class="ai-loading hidden">
+                        <div class="spinner" aria-hidden="true"></div>
+                        <span>Contacting backend AI endpoint (/api/ai/generate-description)…</span>
+                    </div>
+
+                    <!-- Supplementary Problem 3: AI Disclaimer -->
+                    <div id="ai-disclaimer" class="ai-disclaimer hidden">
+                        <span class="disclaimer-icon" aria-hidden="true">⚠️</span>
+                        <div>
+                            <strong>AI Disclaimer:</strong> The description below is an AI-generated suggestion. Please review and edit before saving.
+                            <div id="ai-source-badge" class="ai-badge"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="task-desc">Description <span class="label-note">editable suggestion</span></label>
+                        <textarea id="task-desc" rows="5" placeholder="Enter a description, or let the AI draft one for you…" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Create task <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right stack -->
+            <div class="side-stack">
+                <section class="panel task-board">
+                    <div class="panel-head">
+                        <span class="panel-index">02</span>
+                        <div>
+                            <h2>Task board</h2>
+                            <p><span id="task-count">0</span> tasks in your queue</p>
+                        </div>
+                    </div>
+                    <ul id="tasks-list" class="tasks-list"></ul>
+                </section>
+
+                <section class="panel guardrails">
+                    <div class="panel-head">
+                        <span class="panel-index">03</span>
+                        <div>
+                            <h2>Guardrails</h2>
+                            <p>Responsible AI architecture</p>
+                        </div>
+                    </div>
+                    <ul class="guardrail-list">
+                        <li>
+                            <span class="guardrail-icon" aria-hidden="true">🔐</span>
+                            <div><strong>Server-side secret</strong><p>The API key lives in <code>.env</code> on Express and is never exposed to the browser.</p></div>
+                        </li>
+                        <li>
+                            <span class="guardrail-icon" aria-hidden="true">🛟</span>
+                            <div><strong>Graceful degradation</strong><p>Timeouts, invalid keys, or outages fall back to a template suggestion instead of crashing.</p></div>
+                        </li>
+                        <li>
+                            <span class="guardrail-icon" aria-hidden="true">⏱️</span>
+                            <div><strong>Rate limiting</strong><p>A sliding window caps AI calls at 5 per minute per client to protect quota.</p></div>
+                        </li>
+                        <li>
+                            <span class="guardrail-icon" aria-hidden="true">✍️</span>
+                            <div><strong>Human in the loop</strong><p>AI output always arrives as an editable suggestion — never forced on the user.</p></div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </main>
+
+        <footer>
+            <p>AWDF Practical 13 · Charotar University of Science and Technology</p>
+            <p class="footer-note">Express · Server-side AI proxy · Responsible AI</p>
+        </footer>
+    </div>
+
+    <!-- Notification Banner -->
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
